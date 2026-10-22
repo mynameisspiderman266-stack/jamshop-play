@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#8fd3ff">
+  <title>果酱连锁店</title>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #8fd3ff; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    #wrap { position: fixed; left: 0; top: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    #unity-canvas { display: block; background: #8fd3ff; outline: none; -webkit-tap-highlight-color: transparent; }
+    #loading { position: fixed; left: 0; top: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #8fd3ff; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; color: #fff; z-index: 10; transition: opacity .3s; }
+    #loading .title { font-size: 30px; font-weight: bold; letter-spacing: 2px; text-shadow: 0 2px 0 #2a6fbf, 0 0 6px rgba(0,0,0,.15); margin-bottom: 26px; }
+    #loading .bar { width: 62vw; max-width: 320px; height: 14px; border-radius: 7px; background: rgba(255,255,255,.45); overflow: hidden; box-shadow: inset 0 0 0 2px rgba(42,111,191,.35); }
+    #loading .fill { width: 0; height: 100%; background: #5ec24a; border-radius: 7px; transition: width .2s; }
+    #loading .tip { margin-top: 14px; font-size: 14px; opacity: .9; }
+    #err { display: none; position: fixed; left: 8%; right: 8%; top: 40%; padding: 16px; border-radius: 12px; background: rgba(0,0,0,.75); color: #fff; font: 14px/1.6 -apple-system, "PingFang SC", sans-serif; z-index: 20; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <div id="wrap"><canvas id="unity-canvas" tabindex="-1"></canvas></div>
+  <div id="loading">
+    <div class="title">果酱连锁店</div>
+    <div class="bar"><div class="fill" id="fill"></div></div>
+    <div class="tip" id="tip">加载中 0%</div>
+  </div>
+  <div id="err"></div>
+  <script>
+    var canvas = document.getElementById('unity-canvas');
+    // 竖屏 9:16 为主：手机上铺满全屏；电脑浏览器上按 9:16 居中显示
+    function fit() {
+      var w = window.innerWidth, h = window.innerHeight;
+      var mobile = /iPhone|iPad|iPod|Android|HarmonyOS/i.test(navigator.userAgent);
+      var cw = w, ch = h;
+      if (!mobile && w / h > 0.62) { ch = h; cw = Math.round(h * 9 / 16); }
+      canvas.style.width = cw + 'px';
+      canvas.style.height = ch + 'px';
+    }
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', function () { setTimeout(fit, 300); });
+    fit();
+    document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+    document.addEventListener('touchmove', function (e) { e.preventDefault(); }, { passive: false });
+
+    var buildUrl = "Build";
+    var config = {
+      dataUrl: buildUrl + "/268b0ba27cff22618b1efc44e8bb3a1a.data.unityweb",
+      frameworkUrl: buildUrl + "/20369e7a5afeb95545e11eae9e0c84fc.framework.js.unityweb",
+      codeUrl: buildUrl + "/a7ac31ab3c6cd170266051d1a5bda562.wasm.unityweb",
+      symbolsUrl: buildUrl + "/ce42c2522e5e1ab3a1d9ef1ade01502b.symbols.json.unityweb",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Terry",
+      productName: "果酱连锁店",
+      productVersion: "1.0.0",
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 1.5), // 省电：最多 1.5 倍像素
+      showBanner: function (msg, type) { if (type === 'error') showErr(msg); }
+    };
+    function showErr(msg) { var e = document.getElementById('err'); e.textContent = '出错了：\n' + msg; e.style.display = 'block'; }
+
+    var script = document.createElement("script");
+    script.src = buildUrl + "/7b236e996596ac2d7a8db4113bc0b468.loader.js";
+    script.onload = function () {
+      createUnityInstance(canvas, config, function (p) {
+        var pct = Math.round(p * 100);
+        document.getElementById('fill').style.width = pct + '%';
+        document.getElementById('tip').textContent = '加载中 ' + pct + '%';
+      }).then(function () {
+        var l = document.getElementById('loading');
+        l.style.opacity = '0';
+        setTimeout(function () { l.style.display = 'none'; }, 350);
+      }).catch(function (m) { showErr(m); });
+    };
+    script.onerror = function () { showErr('加载文件失败，请检查上传是否完整'); };
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>
